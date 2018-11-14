@@ -122,7 +122,7 @@ with open(post2017FileString) as csvfile:
             date = row['Incident Date & Time']                      
             crimeDates.append(datetime.date(int(date[6:10]),\
                         int(date[0:2]),int(date[3:5])))  
-            crimeCodes.append(row['State Offense Code'])
+            crimeCodes.append(row['Arrest Charge'])
         except:
             continue
 csvfile.close()
@@ -175,8 +175,9 @@ for i in range(0,len(addresses)):
 outFile = 'CrimeRatesByLight.csv'
 with open(outFile,'w') as csvfile:
     fieldnames = ['Address','Name','InstallDate','Latitude','Longitude','Tract',\
-                  'DistToStation','Before','MurderBefore','RobberyBefore',\
-                  'AggAltBefore','BurgBefore','LarcBefore','VTheftBefore','ArsonBefore','After']
+                  'DistToStation','Before','PctMurder','PctRobbery',\
+                  'PctAggAlt','PctBurg','PctLarc','PctVTheft','PctArson','After',\
+                  'ISGAS','ISLIQUOR','ISFAST','PctReduction']
     writer = csv.DictWriter(csvfile,fieldnames=fieldnames)    
     writer.writeheader()
     for i in range(0,len(addresses)):
@@ -190,15 +191,19 @@ with open(outFile,'w') as csvfile:
             'Latitude':lightLats[i],\
             'Longitude':lightLongs[i],\
             'Tract':lightTracts[i],\
+            'ISGAS':lightIsGas[i],\
+            'ISLIQUOR':lightIsLiquor[i],\
+            'ISFAST':lightIsFast[i],\
             'DistToStation':nearestStation[i],\
             'Before':before[i],\
-            'MurderBefore':murderBefore[i]/before[i],\
-            'RobberyBefore':robberyBefore[i]/before[i],\
-            'AggAltBefore':aggAssBefore[i]/before[i],\
-            'BurgBefore':burglaryBefore[i]/before[i],\
-            'LarcBefore':larcenyBefore[i]/before[i],\
-            'VTheftBefore':vTheftBefore[i]/before[i],\
-            'ArsonBefore':arsonBefore[i]/before[i],\
-            'After':after[i]})
+            'PctMurder':murderBefore[i]/before[i],\
+            'PctRobbery':robberyBefore[i]/before[i],\
+            'PctAggAlt':aggAssBefore[i]/before[i],\
+            'PctBurg':burglaryBefore[i]/before[i],\
+            'PctLarc':larcenyBefore[i]/before[i],\
+            'PctVTheft':vTheftBefore[i]/before[i],\
+            'PctArson':arsonBefore[i]/before[i],\
+            'After':after[i],\
+            'PctReduction':(1.0-(after[i]/before[i]))*100.0})
     
     
