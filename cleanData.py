@@ -19,8 +19,11 @@ def haversine(lon1, lat1, lon2, lat2):
     r = 2.090226E7 #feet
     return c * r
 
-#dataDirectory = "C:\\Users\\Daniel Hatcher\\Desktop\\STA591\\"
-dataDirectory = "/Users/hatcher/Desktop/STA591/"
+#Windows
+dataDirectory = "C:\\Users\\Daniel Hatcher\\Documents\\GitHub\\STA591\\"
+    
+#Mac
+#dataDirectory = "/Users/hatcher/Desktop/STA591/"
 
 #Load light dataset
 lightsFileName = "PGLInstallBeforeNov17.csv"
@@ -131,7 +134,6 @@ csvfile.close()
 burglaryCodes = ['22001','22002','22003']
 larcenyCodes = ['23001','23002','23003','23004','23005','23006','23007']
 
-
 #Crime variables 
 murderBefore = [0.0]*len(addresses)
 robberyBefore = [0.0]*len(addresses)
@@ -143,6 +145,125 @@ arsonBefore = [0.0]*len(addresses)
 
 before = [0.0]*len(addresses)
 after = [0.0]*len(addresses)
+
+#Import business locations
+
+#Windows 
+businessDirectory = dataDirectory + 'Businesses\\Geocoded\\'
+
+#Bars
+barsFile = businessDirectory + 'DetroitBars_GeoCoded.csv'
+barLats = []
+barLongs = []
+with open(barsFile) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        barLats.append(float(row['Latitude']))
+        barLongs.append(float(row['Longitude']))
+csvfile.close()
+nearestBar = []
+for i in range(0,len(addresses)):
+    currentMin = 1E9
+    for j in range(0,len(barLats)):
+        distance = haversine(lightLongs[i],lightLats[i],barLongs[j],barLats[j])
+        if distance < currentMin:
+            currentMin = distance
+    nearestBar.append(currentMin)
+    
+#Corner shops
+cornerFile = businessDirectory + 'DetroitCornerShops_GeoCoded.csv'
+cornerLats = []
+cornerLongs = []
+with open(cornerFile) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        cornerLats.append(float(row['Latitude']))
+        cornerLongs.append(float(row['Longitude']))
+csvfile.close()
+nearestCorner = []
+for i in range(0,len(addresses)):
+    currentMin = 1E9
+    for j in range(0,len(cornerLats)):
+        distance = haversine(lightLongs[i],lightLats[i],cornerLongs[j],cornerLats[j])
+        if distance < currentMin:
+            currentMin = distance
+    nearestCorner.append(currentMin)    
+    
+#General shops
+generalFile = businessDirectory + 'DetroitGeneral_Geocoded.csv'
+generalLats = []
+generalLongs = []
+with open(generalFile) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        generalLats.append(float(row['Latitude']))
+        generalLongs.append(float(row['Longitude']))
+csvfile.close()
+nearestGeneral = []
+for i in range(0,len(addresses)):
+    currentMin = 1E9
+    for j in range(0,len(generalLats)):
+        distance = haversine(lightLongs[i],lightLats[i],generalLongs[j],generalLats[j])
+        if distance < currentMin:
+            currentMin = distance
+    nearestGeneral.append(currentMin) 
+    
+#Liquor shops
+liquorFile = businessDirectory + 'DetroitLiquor_Geocoded.csv'
+liquorLats = []
+liquorLongs = []
+with open(liquorFile) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        liquorLats.append(float(row['Latitude']))
+        liquorLongs.append(float(row['Longitude']))
+csvfile.close()
+nearestLiquor = []
+for i in range(0,len(addresses)):
+    currentMin = 1E9
+    for j in range(0,len(liquorLats)):
+        distance = haversine(lightLongs[i],lightLats[i],liquorLongs[j],liquorLats[j])
+        if distance < currentMin:
+            currentMin = distance
+    nearestLiquor.append(currentMin)    
+    
+#Schools
+schoolFile = businessDirectory + 'DetroitSchools_Geocoded.csv'
+schoolLats = []
+schoolLongs = []
+with open(schoolFile) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        schoolLats.append(float(row['Latitude']))
+        schoolLongs.append(float(row['Longitude']))
+csvfile.close()
+nearestSchool = []
+for i in range(0,len(addresses)):
+    currentMin = 1E9
+    for j in range(0,len(schoolLats)):
+        distance = haversine(lightLongs[i],lightLats[i],schoolLongs[j],schoolLats[j])
+        if distance < currentMin:
+            currentMin = distance
+    nearestSchool.append(currentMin)     
+    
+#Take-out
+toFile = businessDirectory + 'DetroitTakeOut_Geocoded.csv'
+toLats = []
+toLongs = []
+with open(toFile) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        toLats.append(float(row['Latitude']))
+        toLongs.append(float(row['Longitude']))
+csvfile.close()
+nearestTO = []
+for i in range(0,len(addresses)):
+    currentMin = 1E9
+    for j in range(0,len(toLats)):
+        distance = haversine(lightLongs[i],lightLats[i],toLongs[j],toLats[j])
+        if distance < currentMin:
+            currentMin = distance
+    nearestTO.append(currentMin)     
 
 #Determine if crime within view of a light
 limit = 2*330 #Median block length
@@ -177,7 +298,8 @@ with open(outFile,'w') as csvfile:
     fieldnames = ['Address','Name','InstallDate','Latitude','Longitude','Tract',\
                   'DistToStation','Before','PctMurder','PctRobbery',\
                   'PctAggAlt','PctBurg','PctLarc','PctVTheft','PctArson','After',\
-                  'ISGAS','ISLIQUOR','ISFAST','PctReduction']
+                  'ISGAS','ISLIQUOR','ISFAST','PctReduction','NearBar','NearCorner',\
+                  'NearGeneral','NearLiquor','NearSchool','NearTO']
     writer = csv.DictWriter(csvfile,fieldnames=fieldnames)    
     writer.writeheader()
     for i in range(0,len(addresses)):
@@ -204,6 +326,12 @@ with open(outFile,'w') as csvfile:
             'PctVTheft':vTheftBefore[i]/before[i],\
             'PctArson':arsonBefore[i]/before[i],\
             'After':after[i],\
+            'NearBar':nearestBar[i],\
+            'NearCorner':nearestCorner[i],\
+            'NearGeneral':nearestGeneral[i],\
+            'NearLiquor':nearestLiquor[i],\
+            'NearSchool':nearestSchool[i],\
+            'NearTO':nearestTO[i],\
             'PctReduction':(1.0-(after[i]/before[i]))*100.0})
     
-    
+   
